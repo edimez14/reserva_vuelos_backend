@@ -16,6 +16,8 @@ from dotenv import load_dotenv
 from urllib.parse import urlparse, parse_qsl
 from datetime import timedelta
 
+from decouple import config
+
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -28,6 +30,11 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = os.getenv('DEBUG') == 'True'
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',') if os.getenv('ALLOWED_HOSTS') else []
+
+# API key for AviationStack (if needed for flight data)
+AVIATIONSTACK_API_KEY = config('AVIATIONSTACK_API_KEY')
+AVIATIONSTACK_API_URL = config('AVIATIONSTACK_API_URL', default='http://api.aviationstack.com/v1/flights')
+AVIATIONSTACK_DEFAULT_LIMIT = config('AVIATIONSTACK_DEFAULT_LIMIT', default=100, cast=int)
 
 # Application definition
 INSTALLED_APPS = [
