@@ -42,9 +42,10 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'corsheaders',
     # Local apps
-    # 'apps.users',
-    # 'apps.flights',
-    # 'apps.reservations',
+    'apps.users',
+    'apps.flights',
+    'apps.reservations',
+    'apps.tickets',
 ]
 
 MIDDLEWARE = [
@@ -114,7 +115,7 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Custom user model
-# AUTH_USER_MODEL = 'users.User'
+AUTH_USER_MODEL = 'users.User'
 
 # REST Framework
 REST_FRAMEWORK = {

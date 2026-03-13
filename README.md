@@ -16,3 +16,5 @@ las apps que usara el backend son las siguientes:
 Tambien se crearon los archivos de .env, y se realizo  la conexion a la base de datos de forma remota usando neon console
 
 Tiene el dockerfile para prepararlo para el despligue en fly
+
+### rama feature/2-database-models
