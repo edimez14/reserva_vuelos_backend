@@ -53,3 +53,4 @@ En esta rama se crearon los modelos de datos y se configuró la base de datos re
 - El modelo `User` utiliza `email` como identificador único (`USERNAME_FIELD`) y está configurado en `settings.py` con `AUTH_USER_MODEL = 'users.User'`.
 - Se incluyó el campo `deleted_at` para soft delete en usuarios, cumpliendo el requisito de desactivación sin borrado físico.
 
+### rama feature/3-authentication
