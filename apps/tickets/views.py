@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from .serializers import PurchaseSerializer
-from apps.emails.services import send_purchase_confirmation
+from apps.emails.services import send_purchase_confirmation, send_ticket_receipt
 
 class PurchaseView(APIView):
     permission_classes = [IsAuthenticated]
@@ -12,8 +12,9 @@ class PurchaseView(APIView):
         serializer = PurchaseSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
             ticket = serializer.save()
-            # Enviar email de confirmación
+            # Enviar emails
             send_purchase_confirmation(request.user.email, ticket)
+            send_ticket_receipt(request.user.email, ticket)
             return Response({
                 'message': 'Compra exitosa',
                 'ticket_id': ticket.id,

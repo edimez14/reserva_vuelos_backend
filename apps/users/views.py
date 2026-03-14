@@ -5,6 +5,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from .serializers import RegisterSerializer, LoginSerializer, ForgotPasswordSerializer, ResetPasswordSerializer
+from apps.emails.services import send_registration_email
 
 class RegisterView(APIView):
     permission_classes = [AllowAny]
@@ -13,6 +14,7 @@ class RegisterView(APIView):
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
+            send_registration_email(user.email, user.name)
             # Generar tokens JWT
             refresh = RefreshToken.for_user(user)
             return Response({

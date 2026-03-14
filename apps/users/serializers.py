@@ -4,8 +4,7 @@ from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.contrib.auth import get_user_model
-from django.core.mail import send_mail
-from django.conf import settings
+from apps.emails.services import send_password_reset_email
 
 User = get_user_model()
 
@@ -46,20 +45,11 @@ class ForgotPasswordSerializer(serializers.Serializer):
     def save(self):
         email = self.validated_data['email']
         user = User.objects.get(email=email)
-        # Generar token y uid
         token_generator = PasswordResetTokenGenerator()
         token = token_generator.make_token(user)
         uid = urlsafe_base64_encode(force_str(user.pk).encode())
-        # Construir link de reset (frontend debería capturarlo)
-        reset_link = f"http://localhost:3000/api/v1/auth/reset-password/{uid}/{token}/"  # ajusta URL de tu frontend
-        # Enviar email
-        send_mail(
-            'Recuperación de contraseña',
-            f'Haz clic en el siguiente enlace para restablecer tu contraseña: {reset_link}',
-            settings.DEFAULT_FROM_EMAIL or 'noreply@example.com',
-            [email],
-            fail_silently=False,
-        )
+        reset_link = f"http://localhost:3000/reset-password/{uid}/{token}/"
+        send_password_reset_email(user.email, reset_link)
         return email
 
 class ResetPasswordSerializer(serializers.Serializer):

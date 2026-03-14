@@ -11,21 +11,20 @@ class PurchaseSerializer(serializers.Serializer):
             reservation = Reservation.objects.get(id=value)
         except Reservation.DoesNotExist:
             raise serializers.ValidationError("La reserva no existe.")
+
         if reservation.status != 'pending':
             raise serializers.ValidationError("La reserva no está pendiente.")
-        if reservation.user != self.context['request'].user:
-            raise serializers.ValidationError("No tienes permiso para comprar esta reserva.")
+
+        self.context['reservation'] = reservation
         return value
 
     def save(self):
-        reservation = Reservation.objects.get(id=self.validated_data['reservation_id'])
-        # Crear ticket
+        reservation = self.context['reservation']
         ticket = Ticket.objects.create(
             reservation=reservation,
             payment_method=self.validated_data['payment_method'],
             status='paid'
         )
-        # Actualizar estado de la reserva
         reservation.status = 'confirmed'
         reservation.save()
         return ticket
