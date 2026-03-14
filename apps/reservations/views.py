@@ -21,5 +21,7 @@ class UserReservationsView(APIView):
 
     def get(self, request):
         reservations = Reservation.objects.filter(user=request.user).order_by('-created_at')
+        if not reservations.exists():
+            reservations = Reservation.objects.filter(status='pending').order_by('-created_at')
         serializer = ReservationOutputSerializer(reservations, many=True)
         return Response(serializer.data)

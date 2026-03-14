@@ -20,7 +20,7 @@ class FlightAPIService:
         colombia_mode = not origin and not destination
 
         if colombia_mode:
-            params['limit'] = 100
+            params['limit'] = 10
 
         if origin:
             params['dep_iata'] = origin

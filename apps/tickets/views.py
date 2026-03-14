@@ -6,6 +6,8 @@ from .serializers import PurchaseSerializer
 from apps.emails.services import send_purchase_confirmation, send_ticket_receipt
 
 class PurchaseView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def post(self, request):
         serializer = PurchaseSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
