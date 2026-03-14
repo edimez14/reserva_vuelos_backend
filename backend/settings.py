@@ -64,6 +64,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'backend.middleware.PurchaseTimeoutMiddleware',
 ]
 
 ROOT_URLCONF = 'backend.urls'
@@ -162,7 +163,7 @@ EMAIL_BACKEND = os.getenv('EMAIL_BACKEND')
 # EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
 # EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
 # EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
-# DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@vuelos.com')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
 
 # External flight API
 # FLIGHT_API_KEY = os.getenv('FLIGHT_API_KEY')
