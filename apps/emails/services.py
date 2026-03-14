@@ -3,7 +3,11 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.urls import reverse
 
+# Resumen:
+# Este módulo centraliza todos los correos automáticos del backend.
+# Así evitamos repetir lógica de email en cada vista.
 def send_registration_email(user_email, user_name):
+    # Correo de bienvenida después del registro.
     subject = 'Bienvenido a Reserva Vuelos'
     message = f"""
     Hola {user_name},
@@ -20,6 +24,7 @@ def send_registration_email(user_email, user_name):
     )
 
 def send_password_reset_email(user_email, reset_link):
+    # Correo para recuperar contraseña con enlace temporal.
     subject = 'Recuperación de contraseña'
     message = f"""
     Hola,
@@ -36,6 +41,7 @@ def send_password_reset_email(user_email, reset_link):
     )
 
 def send_purchase_confirmation(user_email, ticket):
+    # Confirmación de compra con datos básicos del ticket.
     subject = 'Confirmación de compra'
     message = f"""
     Tu compra ha sido confirmada.
@@ -56,6 +62,7 @@ def send_purchase_confirmation(user_email, ticket):
 
 def send_ticket_receipt(user_email, ticket):
     # Podría ser más detallado con PDF, pero por ahora texto simple
+    # Este correo actúa como comprobante inicial del billete electrónico.
     subject = 'Tu billete electrónico'
     message = f"""
     Adjuntamos tu billete para el vuelo {ticket.reservation.flight.flight_number}.

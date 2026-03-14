@@ -1,5 +1,8 @@
 from django.db import models
 
+# Resumen:
+# Este modelo guarda vuelos en base de datos para poder relacionarlos con reservas.
+# A veces vienen de API externa, pero aquí quedan en formato interno del sistema.
 class Flight(models.Model):
     """Modelo que representa un vuelo (puede venir de API externa o ser propio)."""
     flight_number = models.CharField(max_length=20, unique=True, verbose_name='Número de vuelo')
@@ -15,6 +18,7 @@ class Flight(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
+        # Orden por fecha de salida para mostrar primero lo más cercano.
         verbose_name = 'Vuelo'
         verbose_name_plural = 'Vuelos'
         ordering = ['departure_time']

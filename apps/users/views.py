@@ -7,10 +7,14 @@ from django.contrib.auth import authenticate
 from .serializers import RegisterSerializer, LoginSerializer, ForgotPasswordSerializer, ResetPasswordSerializer, ProfileSerializer
 from apps.emails.services import send_registration_email
 
+# Resumen:
+# Este archivo tiene endpoints de autenticación y perfil.
+# Flujo: registro/login -> tokens JWT -> acceso a endpoints protegidos.
 class RegisterView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
+        # Recibe datos, crea usuario y devuelve tokens para que el frontend inicie sesión.
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
@@ -31,6 +35,7 @@ class LoginView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
+        # Valida credenciales y, si todo bien, emite JWT refresh/access.
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
             email = serializer.validated_data['email']
@@ -59,6 +64,7 @@ class ForgotPasswordView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
+        # Envía correo con enlace de recuperación.
         serializer = ForgotPasswordSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -69,6 +75,7 @@ class ResetPasswordView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
+        # Cambia contraseña usando uid + token del correo.
         serializer = ResetPasswordSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -79,10 +86,12 @@ class ProfileView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        # Retorna los datos del usuario autenticado.
         serializer = ProfileSerializer(request.user)
         return Response(serializer.data)
 
     def put(self, request):
+        # Actualización parcial del perfil (name, phone, etc.).
         serializer = ProfileSerializer(request.user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -90,5 +99,6 @@ class ProfileView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request):
+        # Desactivación lógica del usuario (soft delete).
         request.user.soft_delete()
         return Response({'detail': 'Usuario desactivado correctamente.'}, status=status.HTTP_204_NO_CONTENT)

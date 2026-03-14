@@ -2,6 +2,9 @@ from rest_framework import serializers
 from .models import Reservation, Passenger
 from apps.flights.models import Flight
 
+# Resumen:
+# Este archivo transforma datos para crear reservas y listar resultados.
+# Aquí validamos la estructura del vuelo y creamos reserva + pasajeros en cadena.
 class PassengerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Passenger
@@ -14,6 +17,7 @@ class ReservationCreateSerializer(serializers.Serializer):
     seat_selection = serializers.CharField(required=False, allow_blank=True)
 
     def validate_flight_data(self, value):
+        # Revisamos campos mínimos para evitar crear reservas incompletas.
         # Validar que tenga los campos necesarios
         required = ['flight_number', 'airline', 'origin', 'destination',
                     'departure_time', 'arrival_time', 'price']
@@ -23,6 +27,7 @@ class ReservationCreateSerializer(serializers.Serializer):
         return value
 
     def create(self, validated_data):
+        # 1) Busca o crea vuelo, 2) crea reserva, 3) crea pasajeros.
         user = self.context['request'].user
         flight_data = validated_data['flight_data']
         passengers_data = validated_data['passengers']
@@ -58,6 +63,7 @@ class ReservationCreateSerializer(serializers.Serializer):
         return reservation
 
 class ReservationOutputSerializer(serializers.ModelSerializer):
+    # Serializer de salida para mostrar info principal de cada reserva.
     flight = serializers.StringRelatedField()  # o puedes anidar más detalles
     class Meta:
         model = Reservation

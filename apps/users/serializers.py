@@ -8,6 +8,9 @@ from apps.emails.services import send_password_reset_email
 
 User = get_user_model()
 
+# Resumen:
+# Aquí validamos todo lo que entra/sale en autenticación:
+# registro, login, recuperación de contraseña y perfil.
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
     password2 = serializers.CharField(write_only=True, required=True)
@@ -17,6 +20,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         fields = ('email', 'name', 'phone', 'password', 'password2')
 
     def validate(self, attrs):
+        # Regla básica: ambas contraseñas deben ser iguales.
         if attrs['password'] != attrs['password2']:
             raise serializers.ValidationError({"password": "Las contraseñas no coinciden."})
         return attrs
@@ -43,6 +47,7 @@ class ForgotPasswordSerializer(serializers.Serializer):
         return value
 
     def save(self):
+        # Generamos token + uid para construir link de restablecimiento.
         email = self.validated_data['email']
         user = User.objects.get(email=email)
         token_generator = PasswordResetTokenGenerator()
@@ -59,6 +64,7 @@ class ResetPasswordSerializer(serializers.Serializer):
     new_password2 = serializers.CharField(write_only=True)
 
     def validate(self, attrs):
+        # Verificamos doble contraseña y validez de uid/token.
         if attrs['new_password'] != attrs['new_password2']:
             raise serializers.ValidationError({"new_password": "Las contraseñas no coinciden."})
         try:
@@ -79,6 +85,7 @@ class ResetPasswordSerializer(serializers.Serializer):
         return user
     
 class ProfileSerializer(serializers.ModelSerializer):
+    # Serializer para leer/editar datos básicos del usuario logueado.
     class Meta:
         model = User
         fields = ['id', 'email', 'name', 'phone', 'created_at']

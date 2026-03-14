@@ -2,6 +2,9 @@ from django.db import models
 from django.conf import settings
 from apps.flights.models import Flight
 
+# Resumen:
+# Aquí están los modelos de reservas y pasajeros.
+# Una reserva pertenece a un usuario y a un vuelo; además puede tener varios pasajeros.
 class Reservation(models.Model):
     """Reserva de un vuelo realizada por un usuario."""
     class Status(models.TextChoices):

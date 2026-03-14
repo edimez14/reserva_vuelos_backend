@@ -5,6 +5,8 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from .services import FlightAPIService
 from .serializers import FlightSearchSerializer, FlightOutputSerializer
 
+# Resumen:
+# Esta vista recibe filtros de búsqueda, llama a la API externa y responde vuelos listos para el frontend.
 class FlightSearchView(APIView):
     """
     Endpoint para buscar vuelos desde API externa
@@ -19,6 +21,7 @@ class FlightSearchView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
         # Llamar al servicio externo
+        # La vista no hace lógica pesada: delega al service para mantener ordenado el código.
         service = FlightAPIService()
         result = service.search_flights(**serializer.validated_data)
         
@@ -29,6 +32,7 @@ class FlightSearchView(APIView):
             )
         
         # Formatear respuesta
+        # Reconvertimos para asegurar una estructura uniforme de salida.
         output_serializer = FlightOutputSerializer(result['flights'], many=True)
         return Response({
             'count': len(result['flights']),

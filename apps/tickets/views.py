@@ -5,10 +5,13 @@ from rest_framework.permissions import IsAuthenticated
 from .serializers import PurchaseSerializer
 from apps.emails.services import send_purchase_confirmation, send_ticket_receipt
 
+# Resumen:
+# Endpoint de compra: valida datos, crea ticket y dispara correos de confirmación.
 class PurchaseView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
+        # Flujo corto: validar -> guardar -> notificar por email -> responder al frontend.
         serializer = PurchaseSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
             ticket = serializer.save()

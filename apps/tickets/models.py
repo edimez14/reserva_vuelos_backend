@@ -1,6 +1,9 @@
 from django.db import models
 from apps.reservations.models import Reservation
 
+# Resumen:
+# Modelo de ticket generado cuando una reserva pasa por compra.
+# Es OneToOne con reserva: una reserva confirmada tiene un solo ticket.
 class Ticket(models.Model):
     """Boleto aéreo generado tras la compra de una reserva."""
     class Status(models.TextChoices):

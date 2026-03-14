@@ -1,5 +1,8 @@
 from rest_framework import serializers
 
+# Resumen:
+# Este archivo valida lo que llega por query params al buscar vuelos.
+# También define cómo devolvemos cada vuelo al frontend.
 class FlightSearchSerializer(serializers.Serializer):
     """
     Valida parámetros de búsqueda
@@ -11,9 +14,11 @@ class FlightSearchSerializer(serializers.Serializer):
     direct = serializers.BooleanField(required=False)
 
     def validate_origin(self, value):
+        # Normalizamos a MAYÚSCULAS para evitar diferencias tipo bog vs BOG.
         return value.upper()
 
     def validate_destination(self, value):
+        # Igual que origen: dejamos el código IATA consistente.
         return value.upper()
     
     def validate(self, data):

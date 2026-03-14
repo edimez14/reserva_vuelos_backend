@@ -1,10 +1,15 @@
 #!/usr/bin/env python
+# Resumen:
+# Este archivo es la "puerta" para ejecutar comandos de Django.
+# Se usa para levantar el servidor, hacer migraciones y correr tareas del backend.
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
 
 
 def main():
+    # Esta función prepara Django y ejecuta el comando que escribimos en terminal.
+    # Ejemplos: `python manage.py runserver` o `python manage.py migrate`.
     """Run administrative tasks."""
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.settings')
     try:

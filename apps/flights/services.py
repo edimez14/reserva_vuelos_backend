@@ -1,6 +1,9 @@
 import requests
 from django.conf import settings
 
+# Resumen:
+# Este servicio encapsula toda la comunicación con AviationStack.
+# La idea es que la vista sea simple y aquí viva la lógica de filtros, fallback y limpieza de datos.
 class FlightAPIService:
     COLOMBIA_IATA = [
         'BOG', 'MDE', 'CTG', 'CLO', 'BAQ', 'SMR', 'BGA', 'PEI',
@@ -8,14 +11,17 @@ class FlightAPIService:
     ]
 
     def __init__(self):
+        # Cargamos credenciales desde settings para no quemarlas en código.
         self.api_key = (getattr(settings, 'AVIATIONSTACK_API_KEY', '') or '').strip()
         self.base_url = getattr(settings, 'AVIATIONSTACK_API_URL', 'http://api.aviationstack.com/v1/flights')
         
     def search_flights(self, origin=None, destination=None, date=None, airline=None, direct=None):
+        # Si falta API key, devolvemos error controlado y no revienta todo el backend.
         if not self.api_key:
             return {'error': 'No se configuró AVIATIONSTACK_API_KEY en variables de entorno.'}
 
         params = {'access_key': self.api_key, 'limit': 20}
+        # `restricted_mode` se activa cuando el plan de la API no deja usar ciertos filtros.
         restricted_mode = False
         colombia_mode = not origin and not destination
 
@@ -33,6 +39,7 @@ class FlightAPIService:
 
         try:
             if colombia_mode:
+                # Modo sin filtros: traemos salidas de varios aeropuertos de Colombia para mostrar catálogo base.
                 all_data = []
                 for iata in self.COLOMBIA_IATA:
                     page_params = {'access_key': self.api_key, 'limit': 10, 'dep_iata': iata}
@@ -54,6 +61,7 @@ class FlightAPIService:
 
             if 'error' in data:
                 if data['error'].get('code') == 'function_access_restricted':
+                    # Fallback: si la API restringe funciones, intentamos una consulta más básica.
                     restricted_mode = True
                     fallback_params = {'access_key': self.api_key, 'limit': 100}
                     if origin:
@@ -75,6 +83,7 @@ class FlightAPIService:
             flights = []
             seen = set()
             for flight in data.get('data', []):
+                # Saltamos registros incompletos para evitar respuestas "rotas" al frontend.
                 if not (flight.get('departure') and flight.get('arrival') and flight.get('flight')):
                     continue
 
@@ -104,6 +113,7 @@ class FlightAPIService:
                     departure.get('scheduled') or ''
                 )
                 if flight_key in seen:
+                    # Evita duplicados en la lista final.
                     continue
                 seen.add(flight_key)
 
@@ -123,13 +133,16 @@ class FlightAPIService:
 
             return {'flights': flights}
         except requests.RequestException as e:
+            # Error de red/timeout con API externa.
             return {'error': str(e)}
     
     def _get_simulated_price(self, flight):
+        # Precio simulado porque el proveedor no proporciona precios en la API.
         from random import randint
         return randint(150, 800)
 
     def _is_colombia_departure(self, departure):
+        # descubrimiento simple para detectar si un vuelo sale desde Colombia.
         icao = (departure.get('icao') or '').upper()
         timezone = (departure.get('timezone') or '').lower()
         country = (departure.get('country') or '').lower()
