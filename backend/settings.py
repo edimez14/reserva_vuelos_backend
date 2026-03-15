@@ -79,6 +79,10 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'backend.urls'
 
+# Sin esto, Django intenta redirigir POST /reservations → /reservations/ y explota.
+# Con False, Django no agrega la barra final automáticamente.
+APPEND_SLASH = False
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
