@@ -9,9 +9,10 @@ FROM python:3.14-slim
 # - PYTHONDONTWRITEBYTECODE evita crear archivos .pyc dentro del contenedor.
 # - PYTHONUNBUFFERED hace que los logs salgan en tiempo real.
 # - PORT define el puerto por donde escuchará la app.
+# PORT=8080 es el puerto interno que Fly.io espera por defecto.
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PORT=8000
+    PORT=8080
 
 # Establece el directorio de trabajo
 WORKDIR /app
@@ -34,14 +35,30 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copia el resto del proyecto
 COPY . .
 
+# Recolecta archivos estáticos en la imagen (WhiteNoise los sirve desde aquí).
+# DJANGO_SETTINGS_MODULE y SECRET_KEY se pasan como args de build para que
+# collectstatic pueda importar los settings sin una DB real disponible.
+ARG SECRET_KEY=placeholder-for-build
+ARG DJANGO_SETTINGS_MODULE=backend.settings
+RUN SECRET_KEY=$SECRET_KEY \
+    DJANGO_SETTINGS_MODULE=$DJANGO_SETTINGS_MODULE \
+    python manage.py collectstatic --no-input
+
 # Crea un usuario no root para ejecutar la aplicación
 # Buena práctica de seguridad: no correr procesos como root.
 RUN addgroup --system app && adduser --system --group app
 USER app
 
-# Expone el puerto (se puede sobreescribir con variable de entorno)
+# Expone el puerto interno de Fly.io (sobreescribible con variable de entorno)
 EXPOSE $PORT
 
-# Comando para ejecutar la aplicación con Gunicorn
-# Ojo: el módulo apunta al objeto WSGI del proyecto.
-CMD gunicorn --bind 0.0.0.0:$PORT flight_reservation.wsgi:application
+# Comando para ejecutar la aplicación con Gunicorn.
+# --workers 2: dos procesos para aprovechar la CPU compartida de Fly.
+# --timeout 120: margen para requests lentos (consultas a API externa de vuelos).
+CMD gunicorn \
+    --bind 0.0.0.0:$PORT \
+    --workers 2 \
+    --timeout 120 \
+    --access-logfile - \
+    --error-logfile - \
+    backend.wsgi:application

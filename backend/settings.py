@@ -34,7 +34,14 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG') == 'True'
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',') if os.getenv('ALLOWED_HOSTS') else []
+# ALLOWED_HOSTS: en Fly.io el dominio es <app>.fly.dev
+# Se pueden añadir hosts adicionales mediante la variable de entorno ALLOWED_HOSTS.
+_allowed_env = os.getenv('ALLOWED_HOSTS', '')
+ALLOWED_HOSTS = [h.strip() for h in _allowed_env.split(',') if h.strip()]
+if not ALLOWED_HOSTS:
+    ALLOWED_HOSTS = []
+# Permite health checks internos de Fly.io (necesario para el release command).
+ALLOWED_HOSTS += ['localhost', '127.0.0.1', '.fly.dev']
 
 # API key para AviationStack (servicio externo de vuelos).
 # Estas variables permiten que la app consulte vuelos reales.
@@ -66,6 +73,9 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    # WhiteNoise debe ir justo después de SecurityMiddleware para servir archivos
+    # estáticos de forma eficiente en producción sin necesidad de Nginx.
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -133,6 +143,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+# WhiteNoise: compresión y cache-busting automático para archivos estáticos.
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
