@@ -1,5 +1,6 @@
 import requests
 from django.conf import settings
+from django.core.cache import cache
 
 # Resumen:
 # Este servicio encapsula toda la comunicación con AviationStack.
@@ -14,19 +15,27 @@ class FlightAPIService:
         # Cargamos credenciales desde settings para no quemarlas en código.
         self.api_key = (getattr(settings, 'AVIATIONSTACK_API_KEY', '') or '').strip()
         self.base_url = getattr(settings, 'AVIATIONSTACK_API_URL', 'http://api.aviationstack.com/v1/flights')
+        self.default_limit = getattr(settings, 'AVIATIONSTACK_DEFAULT_LIMIT', 9)
+        self.cache_timeout = getattr(settings, 'FLIGHTS_CACHE_TIMEOUT', 900)
+        self.home_airports = getattr(settings, 'HOME_FLIGHTS_AIRPORTS', ['BOG', 'MDE', 'CTG'])
         
     def search_flights(self, origin=None, destination=None, date=None, airline=None, direct=None):
         # Si falta API key, devolvemos error controlado y no revienta todo el backend.
         if not self.api_key:
             return {'error': 'No se configuró AVIATIONSTACK_API_KEY en variables de entorno.'}
 
-        params = {'access_key': self.api_key, 'limit': 20}
+        cache_key = f"flights:{origin or 'all'}:{destination or 'all'}:{date or 'all'}:{airline or 'all'}:{direct if direct is not None else 'all'}"
+        cached_data = cache.get(cache_key)
+        if cached_data:
+            return cached_data
+
+        params = {'access_key': self.api_key, 'limit': self.default_limit}
         # `restricted_mode` se activa cuando el plan de la API no deja usar ciertos filtros.
         restricted_mode = False
         colombia_mode = not origin and not destination
 
         if colombia_mode:
-            params['limit'] = 10
+            params['limit'] = self.default_limit
 
         if origin:
             params['dep_iata'] = origin
@@ -41,8 +50,8 @@ class FlightAPIService:
             if colombia_mode:
                 # Modo sin filtros: traemos salidas de varios aeropuertos de Colombia para mostrar catálogo base.
                 all_data = []
-                for iata in self.COLOMBIA_IATA:
-                    page_params = {'access_key': self.api_key, 'limit': 10, 'dep_iata': iata}
+                for iata in self.home_airports:
+                    page_params = {'access_key': self.api_key, 'limit': self.default_limit, 'dep_iata': iata}
                     if airline:
                         page_params['airline_name'] = airline
 
@@ -63,7 +72,7 @@ class FlightAPIService:
                 if data['error'].get('code') == 'function_access_restricted':
                     # Fallback: si la API restringe funciones, intentamos una consulta más básica.
                     restricted_mode = True
-                    fallback_params = {'access_key': self.api_key, 'limit': 100}
+                    fallback_params = {'access_key': self.api_key, 'limit': self.default_limit}
                     if origin:
                         fallback_params['dep_iata'] = origin
                     if destination:
@@ -131,7 +140,9 @@ class FlightAPIService:
                     'seats_available': 150,
                 })
 
-            return {'flights': flights}
+            result = {'flights': flights}
+            cache.set(cache_key, result, self.cache_timeout)
+            return result
         except requests.RequestException as e:
             # Error de red/timeout con API externa.
             return {'error': str(e)}

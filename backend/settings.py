@@ -40,7 +40,9 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',') if os.getenv('ALLOWED_
 # Estas variables permiten que la app consulte vuelos reales.
 AVIATIONSTACK_API_KEY = config('AVIATIONSTACK_API_KEY')
 AVIATIONSTACK_API_URL = config('AVIATIONSTACK_API_URL', default='http://api.aviationstack.com/v1/flights')
-AVIATIONSTACK_DEFAULT_LIMIT = config('AVIATIONSTACK_DEFAULT_LIMIT', default=100, cast=int)
+AVIATIONSTACK_DEFAULT_LIMIT = config('AVIATIONSTACK_DEFAULT_LIMIT', default=9, cast=int)
+FLIGHTS_CACHE_TIMEOUT = config('FLIGHTS_CACHE_TIMEOUT', default=900, cast=int)
+HOME_FLIGHTS_AIRPORTS = config('HOME_FLIGHTS_AIRPORTS', default='BOG,MDE,CTG').split(',')
 
 # Application definition
 # Aquí registramos las apps que Django va a cargar.
@@ -130,6 +132,13 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'reserva-vuelos-cache',
+    }
+}
 
 # Custom user model
 AUTH_USER_MODEL = 'users.User'
