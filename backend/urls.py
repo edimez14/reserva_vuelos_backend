@@ -1,22 +1,22 @@
-"""
-URL configuration for backend project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.1/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from apps.reservations.views import ReservationCreateView, UserReservationsView
+from apps.tickets.views import PurchaseView
 
+# Resumen:
+# Este archivo conecta todas las rutas principales del backend.
+# Piensa en esto como el "mapa grande" que manda cada URL a su app.
 urlpatterns = [
+    # Panel de administración de Django.
     path('admin/', admin.site.urls),
+    # Módulo de autenticación/usuarios.
+    path('api/v1/auth/', include('apps.users.urls')),
+    # Módulo de búsqueda de vuelos.
+    path('api/v1/flights/', include('apps.flights.urls')),
+    # Reservas: rutas registradas directamente para evitar problema de barra final con POST.
+    # El include() con prefijo sin barra daña el matching de sub-rutas, así que las declaramos aquí.
+    path('api/v1/reservations', ReservationCreateView.as_view(), name='reservation-create'),
+    path('api/v1/reservations/user', UserReservationsView.as_view(), name='user-reservations'),
+    # Compra y emisión de ticket.
+    path('api/v1/purchase', PurchaseView.as_view(), name='purchase'),
 ]

@@ -1,0 +1,44 @@
+# Entorno virtual de Python
+.venv/
+venv/
+env/
+
+# Variables de entorno (secretos - nunca al contenedor desde fuente)
+.env
+.env.*
+!.env.example
+
+# Cache de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pycache
+
+# Git
+.git/
+.gitignore
+
+# Archivos de base de datos locales
+*.db
+*.sqlite3
+
+# Logs
+*.log
+
+# VS Code / IDEs
+.vscode/
+.idea/
+*.swp
+
+# Archivos de pytest y cobertura
+.pytest_cache/
+htmlcov/
+.coverage
+coverage.xml
+
+# Archivos generados por Django en desarrollo
+staticfiles/
+
+# Documentación
+README.md
