@@ -24,6 +24,16 @@ from decouple import config
 
 load_dotenv()
 
+
+def _normalize_origin(origin: str) -> str:
+    origin = origin.strip()
+    if not origin:
+        return ''
+    parsed = urlparse(origin)
+    if parsed.scheme and parsed.netloc:
+        return f'{parsed.scheme}://{parsed.netloc}'
+    return origin.rstrip('/')
+
 # Nota junior: BASE_DIR nos ayuda a construir rutas absolutas sin escribir rutas largas a mano.
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -191,7 +201,12 @@ SIMPLE_JWT = {
 # CORS
 # Permite que el frontend (otro dominio/puerto) hable con este backend.
 _cors_env = os.getenv('CORS_ALLOWED_ORIGINS', '')
-CORS_ALLOWED_ORIGINS = [origin.strip() for origin in _cors_env.split(',') if origin.strip()]
+CORS_ALLOWED_ORIGINS = [
+    normalized
+    for origin in _cors_env.split(',')
+    for normalized in [_normalize_origin(origin)]
+    if normalized
+]
 CORS_ALLOW_CREDENTIALS = True
 
 # Email configuration
