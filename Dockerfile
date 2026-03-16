@@ -5,14 +5,13 @@
 # Usa imagen oficial de Python 3.14 slim (Debian)
 FROM python:3.14-slim
 
-# Establece variables de entorno
+# Establece variables de entorno de Python.
 # - PYTHONDONTWRITEBYTECODE evita crear archivos .pyc dentro del contenedor.
 # - PYTHONUNBUFFERED hace que los logs salgan en tiempo real.
-# - PORT define el puerto por donde escuchará la app.
-# PORT=8080 es el puerto interno que Fly.io espera por defecto.
+# Las variables de la aplicación (SECRET_KEY, DATABASE_URL, PORT, etc.)
+# se inyectan en tiempo de ejecución mediante `fly secrets set` en Fly.io.
 ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    PORT=8080
+    PYTHONUNBUFFERED=1
 
 # Establece el directorio de trabajo
 WORKDIR /app
@@ -49,8 +48,8 @@ RUN SECRET_KEY=$SECRET_KEY \
 RUN addgroup --system app && adduser --system --group app
 USER app
 
-# Expone el puerto interno de Fly.io (sobreescribible con variable de entorno)
-EXPOSE $PORT
+# Expone el puerto 8080, que es el que Fly.io inyecta automáticamente en $PORT.
+EXPOSE 8080
 
 # Comando para ejecutar la aplicación con Gunicorn.
 # --workers 2: dos procesos para aprovechar la CPU compartida de Fly.

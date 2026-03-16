@@ -9,14 +9,21 @@ primary_region = "mia"
 # Fly usa el Dockerfile del proyecto directamente.
 [build]
 
-# ---------- Variables de entorno (no secretas) ----------
-# Los secretos reales (SECRET_KEY, DATABASE_URL, etc.) se configuran con:
-#   fly secrets set NOMBRE=valor
-[env]
-DJANGO_SETTINGS_MODULE = "backend.settings"
-PORT = "8080"
-PYTHONUNBUFFERED = "1"
-PYTHONDONTWRITEBYTECODE = "1"
+# ---------- Variables de la aplicación ----------
+# TODAS las variables de la aplicación se inyectan en Fly.io mediante:
+#   fly secrets set SECRET_KEY=valor
+#   fly secrets set DATABASE_URL=valor
+#   fly secrets set AVIATIONSTACK_API_KEY=valor
+#   fly secrets set CORS_ALLOWED_ORIGINS=valor
+#   fly secrets set EMAIL_HOST_USER=valor
+#   fly secrets set EMAIL_HOST_PASSWORD=valor
+#   fly secrets set DEFAULT_FROM_EMAIL=valor
+#   fly secrets set DEBUG=False
+#   fly secrets set ALLOWED_HOSTS=<app>.fly.dev
+#   fly secrets set DJANGO_SETTINGS_MODULE=backend.settings
+#
+# Fly.io inyecta PORT (8080) automáticamente en tiempo de ejecución.
+# No se declara [env] aquí para evitar exponer configuración en el repositorio.
 
 # ---------- Comando de release ----------
 # Se ejecuta antes de que el nuevo servidor arranque.
