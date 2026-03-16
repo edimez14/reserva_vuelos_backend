@@ -2,8 +2,8 @@
 # Este Dockerfile empaqueta el backend para ejecutarlo en cualquier servidor.
 # Primero instala dependencias, copia el proyecto y al final levanta Django con Gunicorn.
 
-# Usa imagen oficial de Python 3.14 slim (Debian)
-FROM python:3.14-slim
+# Usa imagen oficial de Python 3.12 slim (Debian)
+FROM python:3.12-slim
 
 # Establece variables de entorno de Python.
 # - PYTHONDONTWRITEBYTECODE evita crear archivos .pyc dentro del contenedor.
